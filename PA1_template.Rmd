@@ -16,18 +16,30 @@ In this report, I describe the steps to analyze a dataset including the physical
 I downloaded the dataset from the Course web: 
 [Activity monitoring data](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip)
 
-I loaded the dataset, which is stored in *comma-separated-value (CSV)* format:
-
+I load the dataset, which is stored in *comma-separated-value (CSV)* format:
 ```{r load_data}
 activity<-read.csv("activity.csv",header=TRUE, quote = "\"")
-head(activity)
-
+str(activity)
 ```
-
+I convert the date variable from factor to a date format
+```{r convert_date}
+activity$date<-as.Date(activity$date, format="%Y-%m-%d")
+str(activity$date)
+```
 
 ## What is mean total number of steps taken per day?
 
+```{r totalStepsPerDay, fig.height=5, fig.width=8}
+totalSteps<-tapply(activity$steps, activity$date, sum, na.rm=TRUE)
 
+plot(totalSteps, type = "h", col="darkblue", xaxt="n", ylab="Total number of steps", lwd=2, xlab="", main="Total number of steps per day")
+axis(1,at=1:61,labels=names(totalSteps), las=2, cex.axis=0.6)
+```
+```{r meanSteps, echo =FALSE}
+meanSteps<-round(mean(totalSteps),digits = 2)
+medianSteps<-median(totalSteps)
+```
+The mean steps per day was **`r meanSteps`** and the median **`r medianSteps`** 
 
 ## What is the average daily activity pattern?
 
