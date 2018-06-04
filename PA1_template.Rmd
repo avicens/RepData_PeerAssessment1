@@ -1,13 +1,28 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
+author: "Alberto Vicens Sanchez"
+output: html_document
+keep_md: true
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval=TRUE)
+knitr::opts_knit$set(root.dir = "~/cursos/data_science_Coursera/5_reproducible_research/RepData_PeerAssessment1/")
+```
+
+In this report, I describe the steps to analyze a dataset including the physical activity, given in number of steps taken in 5 minute intervals each day, of an anonymous individual during two months (October-November 2012). Through different steps, I will answer to different questions using the information provided in the dataset. 
 
 ## Loading and preprocessing the data
+I downloaded the dataset from the Course web: 
+[Activity monitoring data](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip)
 
+I loaded the dataset, which is stored in *comma-separated-value (CSV)* format:
+
+```{r load_data}
+activity<-read.csv("activity.csv",header=TRUE, quote = "\"")
+head(activity)
+
+```
 
 
 ## What is mean total number of steps taken per day?
