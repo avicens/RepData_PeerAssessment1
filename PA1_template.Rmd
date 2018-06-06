@@ -5,8 +5,8 @@ output: html_document
 keep_md: true
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, eval=TRUE)
+```{r setup, include=FALSE, echo=TRUE}
+knitr::opts_chunk$set(echo = TRUE, eval=TRUE, cache=TRUE,cache.path="cache/", fig.path = "cache/", autodep=TRUE)
 knitr::opts_knit$set(root.dir = "~/cursos/data_science_Coursera/5_reproducible_research/RepData_PeerAssessment1/")
 ```
 
@@ -35,7 +35,7 @@ totalSteps<-tapply(activity$steps, activity$date, sum, na.rm=TRUE)
 plot(totalSteps, type = "h", col="darkblue", xaxt="n", ylab="Total number of steps", lwd=2, xlab="", main="Total number of steps per day")
 axis(1,at=1:61,labels=names(totalSteps), las=2, cex.axis=0.6)
 ```
-```{r meanSteps, echo =FALSE}
+```{r meanSteps}
 meanSteps<-round(mean(totalSteps),digits = 2)
 medianSteps<-median(totalSteps)
 ```
@@ -43,10 +43,59 @@ The mean steps per day was **`r meanSteps`** and the median **`r medianSteps`**
 
 ## What is the average daily activity pattern?
 
-
+```{r, averageDailySteps, echo=FALSE, fig.height=4, fig.width=8}
+averageSteps<-tapply(activity$steps, activity$interval, mean, na.rm=T)
+plot(averageSteps, type = "l", col="darkblue", xaxt="n", ylab="Average number of steps", lwd=2, xlab="5-minute interval", main="Average number of steps per interval")
+axis(1,at=c(1,144,288),labels=names(averageSteps[c(1,144,288)]), cex.axis=0.6)
+```
 
 ## Imputing missing values
 
+```{r NAvalues}
+naCount<-length(which(is.na(activity$steps)))
+``` 
+In the dataset there is a total of *`r naCount` NA values*.
 
+To fill in the NA value, I will replace each NA value for the mean of that 5-day interval, creating the new variable *steps2*
+```{r, replaceNAvalues}
+for (i in 1:nrow(activity)) {
+if (is.na(activity$steps[i])){
+int<-activity[i,3]
+activity$steps2[i] <- averageSteps[as.character(int)]
+}
+else { activity$steps2[i] <- activity$steps[i]}
+}
+head(activity)
+```
+
+```{r totalStepsPerDay2, fig.height=5, fig.width=8}
+totalSteps2<-tapply(activity$steps2, activity$date, sum)
+steps<-rbind(totalSteps,totalSteps2)
+barplot(steps,beside = TRUE, col =c("blue","red"), xlab="", ylab="Total number of steps",main="Total number of steps per day", cex.axis=0.8, cex.names=0.6, las=2)
+legend("top",c("with NA values","imputed NA values"), fill = c("blue","red"), cex = 0.8,bty = "n")
+```
+```{r meanSteps2}
+meanSteps2<-round(mean(totalSteps2),digits = 2)
+medianSteps2<-median(totalSteps2)
+stepsMatrix<-matrix(c(meanSteps, meanSteps2,medianSteps,medianSteps2),nrow=2,ncol=2,dimnames=list(c("means","medians"),c("with NA","imputted NA")))
+library(knitr)
+kable(stepsMatrix)
+```
+
+There is difference in the mean but not in the of total number steps between the datasets.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+```{r compare_weekdays}
+activity$day<-weekdays(activity$date)
+weekday<-c("lunes","martes","miércoles","jueves","viernes")
+weekend<-c("sábado","domingo")
+
+daytype = character()
+for (j in 1:nrow(activity)) {
+  if (activity$day[j] %in% weekday) {
+    daytype[j] =  "weekday" 
+    } else { daytype[j] = "weekend"}
+  }
+activity<-cbind(activity,daytype)
+```
+
