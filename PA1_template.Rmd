@@ -27,11 +27,18 @@ activity$date<-as.Date(activity$date, format="%Y-%m-%d")
 str(activity$date)
 ```
 
+I also convert the interval from integer to time (hours: minutes)
+
+```{r convert_time}
+int2 <- mapply(function(x, y) paste0(rep(x, y), collapse = ""), 0, 4 - nchar(activity$interval))
+int <- paste0(int2,activity$interval)
+activity$interval<- format(strptime(int, format= "%H%M"), format ="%H:%M")
+```
+
 ## What is mean total number of steps taken per day?
 
 ```{r totalStepsPerDay, fig.height=5, fig.width=8}
 totalSteps<-tapply(activity$steps, activity$date, sum, na.rm=TRUE)
-
 plot(totalSteps, type = "h", col="darkblue", xaxt="n", ylab="Total number of steps", lwd=2, xlab="", main="Total number of steps per day")
 axis(1,at=1:61,labels=names(totalSteps), las=2, cex.axis=0.6)
 ```
@@ -45,8 +52,8 @@ The mean steps per day was **`r meanSteps`** and the median **`r medianSteps`**
 
 ```{r, averageDailySteps, echo=FALSE, fig.height=4, fig.width=8}
 averageSteps<-tapply(activity$steps, activity$interval, mean, na.rm=T)
-plot(averageSteps, type = "l", col="darkblue", xaxt="n", ylab="Average number of steps", lwd=2, xlab="5-minute interval", main="Average number of steps per interval")
-axis(1,at=c(1,144,288),labels=names(averageSteps[c(1,144,288)]), cex.axis=0.6)
+plot(averageSteps, type = "l", col="darkblue", xaxt="n", ylab="Average number of steps", lwd=2, xlab="Time", main="Average number of steps per interval")
+axis(1,at=c(1,73,145,217,288),labels=names(averageSteps[c(1,73,145,217,288)]), cex.axis=0.6)
 ```
 
 ## Imputing missing values
@@ -85,7 +92,7 @@ kable(stepsMatrix)
 There is difference in the mean but not in the of total number steps between the datasets.
 
 ## Are there differences in activity patterns between weekdays and weekends?
-```{r compare_weekdays, fig.height=5, fig.width=8}
+```{r classify_days}
 activity$day<-weekdays(activity$date)
 weekday<-c("lunes","martes","miércoles","jueves","viernes")
 
@@ -96,13 +103,15 @@ for (j in 1:nrow(activity)) {
     } else { daytype[j] = "weekend"}
   }
 activity<-cbind(activity,daytype)
+```
 
+```{r compare_weekdays, fig.height=5, fig.width=8}
 averageStepsbyDay<-tapply(activity$steps2, list(activity$interval, activity$daytype), mean, na.rm=T)
 
 library(reshape)
 averageStepsMelted<-melt.array(averageStepsbyDay, varnames=c("interval","daytype"))
 
 library(ggplot2)
-ggplot(data=averageStepsMelted,aes(x=interval,y=value), group=daytype) + geom_line(aes(color = daytype), size = 1.2) + theme(legend.position = "top") + xlab("5 inutes-interval") + ylab("average number of steps") + labs(title="Average number of steps beetwen weekdays and weekend", color ="Day type")
+ggplot(data=averageStepsMelted,aes(x=interval,y=value, group=daytype)) + geom_line(aes(color = daytype), size = 1.2) + theme(legend.position = "top") + xlab("Time") + ylab("Number of steps") + scale_x_discrete(breaks=c("00:00","06:00","12:00","18:00","23:55")) + labs(title="Number of steps beetwen weekdays and weekend", color ="Day type")
 ```
 
