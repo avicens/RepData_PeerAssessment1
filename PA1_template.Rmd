@@ -85,10 +85,9 @@ kable(stepsMatrix)
 There is difference in the mean but not in the of total number steps between the datasets.
 
 ## Are there differences in activity patterns between weekdays and weekends?
-```{r compare_weekdays}
+```{r compare_weekdays, fig.height=5, fig.width=8}
 activity$day<-weekdays(activity$date)
 weekday<-c("lunes","martes","miércoles","jueves","viernes")
-weekend<-c("sábado","domingo")
 
 daytype = character()
 for (j in 1:nrow(activity)) {
@@ -97,5 +96,13 @@ for (j in 1:nrow(activity)) {
     } else { daytype[j] = "weekend"}
   }
 activity<-cbind(activity,daytype)
+
+averageStepsbyDay<-tapply(activity$steps2, list(activity$interval, activity$daytype), mean, na.rm=T)
+
+library(reshape)
+averageStepsMelted<-melt.array(averageStepsbyDay, varnames=c("interval","daytype"))
+
+library(ggplot2)
+ggplot(data=averageStepsMelted,aes(x=interval,y=value), group=daytype) + geom_line(aes(color = daytype), size = 1.2) + theme(legend.position = "top") + xlab("5 inutes-interval") + ylab("average number of steps") + labs(title="Average number of steps beetwen weekdays and weekend", color ="Day type")
 ```
 
