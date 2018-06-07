@@ -56,6 +56,11 @@ plot(averageSteps, type = "l", col="darkblue", xaxt="n", ylab="Average number of
 axis(1,at=c(1,73,145,217,288),labels=names(averageSteps[c(1,73,145,217,288)]), cex.axis=0.6)
 ```
 
+```{r maxStepsInterval}
+maxInterval<-names(averageSteps[averageSteps == max(averageSteps)])
+```
+The time with highest activity is `r maxInterval`
+
 ## Imputing missing values
 
 ```{r NAvalues}
